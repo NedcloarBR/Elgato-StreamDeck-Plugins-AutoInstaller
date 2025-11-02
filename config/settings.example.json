@@ -1,0 +1,12 @@
+{
+  "headless": true,
+  "timeout": {
+    "navigation": 30000,
+    "selector": 10000,
+    "cookie": 10000
+  },
+  "viewport": {
+    "width": 1200,
+    "height": 800
+  }
+}

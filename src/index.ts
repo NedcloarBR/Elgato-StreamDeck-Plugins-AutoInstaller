@@ -6,15 +6,6 @@ import { AuthService } from "./services/AuthService";
 import { PluginScraperService } from "./services/PluginScraperService";
 
 async function main() {
-  if (!config.email) {
-    logger.error("Please provide an email address in process.env.EMAIL");
-    process.exit(1);
-  }
-  if (!config.password) {
-    logger.error("Please provide a password in process.env.PASSWORD");
-    process.exit(1);
-  }
-
   let userDataDir = "";
 
   try {
@@ -31,6 +22,7 @@ async function main() {
     userDataDir = FileSystemHelper.setupUserDataDir();
 
     const browserService = new BrowserService();
+    logger.info(`Headless mode: ${config.headless}`);
     await browserService.launch(userDataDir);
     const page = browserService.getPage();
 

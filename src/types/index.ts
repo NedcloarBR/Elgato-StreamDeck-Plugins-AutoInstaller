@@ -26,3 +26,15 @@ export interface Selectors {
   pluginNameClassName: string;
   installButtonClassName: string;
 }
+
+export type SettingsFileShape = {
+  headless?: boolean;
+  timeout?: { navigation?: number; selector?: number; cookie?: number };
+  viewport?: { width?: number; height?: number };
+};
+
+export type FullSettings = {
+  config: Config;
+  settings: SettingsFileShape;
+  pluginURLs: string[];
+};
