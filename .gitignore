@@ -22,6 +22,7 @@ selenium.log
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+.playwright-browsers
 
 # Config files
 /config/login.json

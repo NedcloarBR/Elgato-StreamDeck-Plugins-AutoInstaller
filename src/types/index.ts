@@ -11,6 +11,7 @@ export interface Config {
     width: number;
     height: number;
   };
+  executablePath?: string;
 }
 
 export interface PluginResult {
@@ -31,6 +32,7 @@ export type SettingsFileShape = {
   headless?: boolean;
   timeout?: { navigation?: number; selector?: number; cookie?: number };
   viewport?: { width?: number; height?: number };
+  executablePath?: string;
 };
 
 export type FullSettings = {

@@ -5,8 +5,10 @@
   "packageManager": "yarn@4.6.0",
   "main": "src/index.ts",
   "scripts": {
-    "start": "tsx src/index.ts",
-    "dev": "tsx --watch src/index.ts"
+    "start": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers tsx src/index.ts",
+    "dev": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers tsx --watch src/index.ts",
+    "postinstall": "yarn install:browsers",
+    "install:browsers": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npx playwright install"
   },
   "keywords": [
     "elgato",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "cross-env": "^10.1.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }

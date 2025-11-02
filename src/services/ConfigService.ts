@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Config, FullSettings } from "../types";
+import type { Config, FullSettings, SettingsFileShape } from "../types";
 import { logger } from "../utils/logger";
 
 export class ConfigService {
@@ -44,22 +44,14 @@ export class ConfigService {
     return []
   }
 
-  private static loadSettings(): {
-    headless?: boolean;
-    timeout?: { navigation?: number; selector?: number; cookie?: number };
-    viewport?: { width?: number; height?: number };
-  } {
+  private static loadSettings(): SettingsFileShape {
     const settingsPath = path.join(this.configDir, "settings.json");
 
     try {
       if (fs.existsSync(settingsPath)) {
         const raw = fs.readFileSync(settingsPath, "utf8");
         const parsed = JSON.parse(raw);
-          const settings: {
-            headless?: boolean;
-            timeout?: { navigation?: number; selector?: number; cookie?: number };
-            viewport?: { width?: number; height?: number };
-          } = {};
+          const settings: SettingsFileShape = {};
 
           if (typeof parsed.headless === "boolean") settings.headless = parsed.headless;
 
@@ -75,6 +67,8 @@ export class ConfigService {
             if (typeof parsed.viewport.width === "number") settings.viewport.width = parsed.viewport.width;
             if (typeof parsed.viewport.height === "number") settings.viewport.height = parsed.viewport.height;
           }
+
+          settings.executablePath = path.join(process.cwd(), ".playwright-browsers");
 
           return settings;
       }
@@ -111,6 +105,7 @@ export class ConfigService {
         width: settings.viewport?.width ?? viewportDefaults.width,
         height: settings.viewport?.height ?? viewportDefaults.height,
       },
+      executablePath: settings.executablePath
     };
 
     const errors = ConfigService.validateConfig(cfg, pluginURLs);
