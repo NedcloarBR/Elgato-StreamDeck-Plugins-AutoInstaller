@@ -13,19 +13,23 @@ export class FileSystemHelper {
 
     fs.mkdirSync(preferencesDir, { recursive: true });
 
-    const preferencesSourcePath = path.join(
-      __dirname,
-      "..",
-      "context",
-      "Preferences"
-    );
     const preferencesDestPath = path.join(preferencesDir, "Preferences");
 
     try {
-      fs.copyFileSync(preferencesSourcePath, preferencesDestPath);
+      const preferencesContent = JSON.stringify({
+        "protocol_handler": {
+          "allowed_origin_protocol_pairs": {
+            "https://marketplace.elgato.com": {
+              "streamdeck": true
+            }
+          }
+        }
+      }, null, 2);
+
+      fs.writeFileSync(preferencesDestPath, preferencesContent, 'utf-8');
       logger.info(`UserData directory created at: ${userDataDir}`);
     } catch (error) {
-      logger.error("Failed to copy Preferences file:", error);
+      logger.error("Failed to create Preferences file:", error);
       throw error;
     }
 

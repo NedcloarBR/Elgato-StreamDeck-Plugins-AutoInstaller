@@ -4,6 +4,12 @@ import { FileSystemHelper } from "./utils/filesystem";
 import { BrowserService } from "./services/BrowserService";
 import { AuthService } from "./services/AuthService";
 import { PluginScraperService } from "./services/PluginScraperService";
+import path from "node:path";
+
+// Set Playwright browsers path to local directory
+const browsersPath = path.join(process.cwd(), ".playwright-browsers");
+process.env.PLAYWRIGHT_BROWSERS_PATH = browsersPath;
+logger.debug(`Playwright browsers path: ${browsersPath}`);
 
 async function main() {
   let userDataDir = "";

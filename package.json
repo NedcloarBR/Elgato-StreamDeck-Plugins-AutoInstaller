@@ -8,7 +8,12 @@
     "start": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers tsx src/index.ts",
     "dev": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers tsx --watch src/index.ts",
     "postinstall": "yarn install:browsers",
-    "install:browsers": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npx playwright install"
+    "install:browsers": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npx playwright install",
+    "clean": "rimraf dist && rimraf release",
+    "build": "yarn clean && npx tsc --outDir dist && node scripts/copy-assets.js",
+    "build:exe": "yarn build && node scripts/build-executable.js",
+    "package": "node scripts/package-release.js",
+    "release:pkg": "yarn build:exe && yarn package"
   },
   "keywords": [
     "elgato",
@@ -18,14 +23,27 @@
     "playwright"
   ],
   "dependencies": {
-    "chalk": "^5.6.2",
+    "chalk": "^4.1.2",
     "playwright": "1.52.0",
     "rebrowser-playwright": "^1.52.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "@yao-pkg/pkg": "^6.10.1",
     "cross-env": "^10.1.0",
+    "rimraf": "^6.1.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
+  },
+  "pkg": {
+    "assets": [
+      "dist/**/*",
+      ".playwright-browsers/**/*"
+    ],
+    "targets": [
+      "node18-win-x64",
+      "node18-macos-x64"
+    ],
+    "outputPath": "release"
   }
 }

@@ -28,3 +28,7 @@ selenium.log
 /config/login.json
 /config/plugins.json
 /config/settings.json
+
+dist
+release
+

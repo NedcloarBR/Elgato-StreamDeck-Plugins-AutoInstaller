@@ -1,0 +1,124 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  build:
+    name: Build Executables
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npm run install:browsers
+
+      - name: Build project
+        run: npm run build
+
+      - name: Build executables
+        run: npm run build:exe
+
+      - name: Create release archives (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Compress-Archive -Path release/streamdeck-installer-win.exe, release/.playwright-browsers, release/config -DestinationPath release/streamdeck-installer-windows.zip
+        shell: pwsh
+
+      - name: Create release archives (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          cd release
+          zip -r streamdeck-installer-macos.zip streamdeck-installer-macos .playwright-browsers config
+
+      - name: Generate checksums (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd release
+          Get-FileHash streamdeck-installer-win.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  $($_.Path | Split-Path -Leaf)" } | Out-File -FilePath SHA256SUMS-windows.txt -Encoding ASCII
+          Get-FileHash streamdeck-installer-windows.zip -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  $($_.Path | Split-Path -Leaf)" } | Out-File -FilePath SHA256SUMS-windows.txt -Encoding ASCII -Append
+        shell: pwsh
+
+      - name: Generate checksums (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          cd release
+          shasum -a 256 streamdeck-installer-macos streamdeck-installer-macos.zip > SHA256SUMS-macos.txt
+
+      - name: Upload Windows artifacts
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: |
+            release/streamdeck-installer-win.exe
+            release/streamdeck-installer-windows.zip
+            release/SHA256SUMS-windows.txt
+
+      - name: Upload macOS artifacts
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: |
+            release/streamdeck-installer-macos
+            release/streamdeck-installer-macos.zip
+            release/SHA256SUMS-macos.txt
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release-files
+          cp artifacts/windows-build/* release-files/ 2>/dev/null || true
+          cp artifacts/macos-build/* release-files/ 2>/dev/null || true
+          ls -la release-files/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release-files/streamdeck-installer-win.exe
+            release-files/streamdeck-installer-windows.zip
+            release-files/streamdeck-installer-macos
+            release-files/streamdeck-installer-macos.zip
+            release-files/SHA256SUMS-windows.txt
+            release-files/SHA256SUMS-macos.txt
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

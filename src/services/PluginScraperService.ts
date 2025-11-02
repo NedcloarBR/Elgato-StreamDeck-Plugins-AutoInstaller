@@ -35,12 +35,12 @@ export class PluginScraperService {
 
       logger.step("Waiting for 'Open in Stream Deck' button...");
       await this.page.waitForFunction(
-        () => {
+        `() => {
           const buttons = Array.from(document.querySelectorAll("button"));
           return buttons.some((btn) =>
             btn.innerText.includes("Open in Stream Deck")
           );
-        },
+        }`,
         { timeout: config.timeout.selector }
       );
 
