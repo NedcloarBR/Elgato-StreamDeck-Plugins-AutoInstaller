@@ -8,7 +8,7 @@
     "start": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers tsx src/index.ts",
     "dev": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers tsx --watch src/index.ts",
     "postinstall": "yarn install:browsers",
-    "install:browsers": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npx playwright install",
+    "install:browsers": "cross-env PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npx playwright install chromium",
     "clean": "rimraf dist && rimraf release",
     "build": "yarn clean && npx tsc --outDir dist && node scripts/copy-assets.js",
     "build:exe": "yarn build && node scripts/build-executable.js",

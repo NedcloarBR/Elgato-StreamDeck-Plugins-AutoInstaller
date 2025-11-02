@@ -73,8 +73,6 @@ jobs:
         with:
           name: windows-build
           path: |
-            release/streamdeck-installer-win.exe
-            release/start.bat
             release/streamdeck-installer-windows.zip
             release/SHA256SUMS-windows.txt
 
@@ -84,8 +82,6 @@ jobs:
         with:
           name: macos-build
           path: |
-            release/streamdeck-installer-macos
-            release/start.sh
             release/streamdeck-installer-macos.zip
             release/SHA256SUMS-macos.txt
 
@@ -118,11 +114,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            release-files/streamdeck-installer-win.exe
-            release-files/start.bat
             release-files/streamdeck-installer-windows.zip
-            release-files/streamdeck-installer-macos
-            release-files/start.sh
             release-files/streamdeck-installer-macos.zip
             release-files/SHA256SUMS-windows.txt
             release-files/SHA256SUMS-macos.txt
