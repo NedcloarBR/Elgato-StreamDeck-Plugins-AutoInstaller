@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Playwright Install
+        run: npx playwright install
+
       - name: Typecheck (TypeScript)
         run: npx tsc --noEmit
-
-      - name: Sanity
-        run: echo "Done: typecheck completed"
