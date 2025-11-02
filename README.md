@@ -12,142 +12,121 @@ Automated tool to install Stream Deck plugins from Elgato Marketplace using Play
 - ✅ Detailed results reporting
 - ✅ Modular and maintainable architecture
 
-## 🚀 Installation
+---
 
-1. Clone the repository or navigate to the directory:
-```bash
-cd Tools/Elgato/StreamDeck/plugins-scrapper
+## 🚀 Quick start
+
+1. Clone the repository and open it:
+
+```powershell
+cd C:\path\to\Elgato-StreamDeck-Plugins-AutoInstaller
 ```
 
 2. Install dependencies:
-```bash
+
+```powershell
 yarn install
 ```
 
-3. Configure environment variables:
-```bash
-cp .env.example .env
+3. Create your configuration files from the provided examples (one-time):
+
+```powershell
+copy config\login.example.json config\login.json
+copy config\plugins.example.json config\plugins.json
+copy config\settings.example.json config\settings.json
 ```
 
-4. Edit the `.env` file with your credentials:
-```env
-EMAIL=your-email@example.com
-PASSWORD=your-password
-HEADLESS=false
-```
+4. Edit the files you just created:
+- `config/login.json` — add your Elgato Marketplace `email` and `password`.
+- `config/plugins.json` — add an array of Elgato Marketplace plugin URLs you want to process.
+- `config/settings.json` — optional. You can control runtime options such as `headless`, `timeout` and `viewport`.
 
-## 📝 Configuration
+5. Run the scraper:
 
-### Add Plugin URLs
-
-Edit the `src/config/index.ts` file and add/uncomment the URLs of the plugins you want to install:
-
-```typescript
-export const pluginURLs = [
-  "https://marketplace.elgato.com/product/obs-studio-...",
-  "https://marketplace.elgato.com/product/twitch-...",
-  // Add more URLs here
-];
-```
-
-### Adjust Timeouts
-
-In the same file, you can adjust timeouts as needed:
-
-```typescript
-export const config: Config = {
-  // ...
-  timeout: {
-    navigation: 30000,  // Time for navigation
-    selector: 10000,    // Time to find elements
-    cookie: 10000,      // Time for cookie banner
-  },
-};
-```
-
-## 🎯 Usage
-
-### Production Mode
-```bash
+```powershell
 yarn start
 ```
 
-### Development Mode (with watch)
-```bash
+For development with live reload:
+
+```powershell
 yarn dev
 ```
 
-### Legacy Mode (old code)
-```bash
-yarn legacy
+---
+
+## 📝 Configuration
+
+This project now reads configuration from the `config/` folder. There are three files you can edit manually:
+
+- `config/login.json` (required)
+  - Shape:
+  ```json
+  {
+    "email": "your-email@example.com",
+    "password": "your-password"
+  }
+  ```
+  - You can also supply credentials via the `EMAIL` and `PASSWORD` environment variables as a fallback.
+
+- `config/plugins.json` (required)
+  - Shape: a JSON array of plugin page URLs:
+  ```json
+  [
+    "https://marketplace.elgato.com/product/obs-studio-...",
+    "https://marketplace.elgato.com/product/twitch-..."
+  ]
+  ```
+
+- `config/settings.json` (optional)
+  - Controls runtime options. Any value omitted falls back to sensible defaults.
+  - Example:
+  ```json
+  {
+    "headless": false,
+    "timeout": {
+      "navigation": 30000,
+      "selector": 10000,
+      "cookie": 10000
+    },
+    "viewport": { "width": 1200, "height": 800 }
+  }
+  ```
+  - Note: If `settings.json` is absent, the code will use the `HEADLESS` environment variable (treated as false only when set to the string `"false"`).
+
+Files with `.example.json` are included in the repository to guide you: `config/login.example.json`, `config/plugins.example.json`, `config/settings.example.json`.
+
+Security note: do not commit `config/login.json` with real credentials. Add it to your `.gitignore`.
+
+---
+
+## ⚙️ Behavior & validation
+
+- On startup the tool will load all three configuration files (with fallbacks) and validate them.
+- If any required values are missing (no email/password or zero plugin URLs), the program will display all validation errors and stop. This helps you fix all issues in one go.
+
+---
+
+## 🎯 Usage
+
+- Production mode (reads `config/` files):
+
+```powershell
+yarn start
 ```
 
-## 📊 Example Output
+- Development mode (watch):
 
-```
-[10:30:15] ℹ UserData directory created at: C:\Temp\playwright-streamdeck-1234567890
-[10:30:15] ℹ Starting the Playwright browser with persistent context
-[10:30:18] ✓ Browser launched successfully
-[10:30:18] ℹ Navigating to Elgato Marketplace...
-
-==================================================
-  Starting Login Process
-==================================================
-
-[10:30:20] ℹ Waiting for cookie banner...
-[10:30:21] ✓ Cookies accepted
-[10:30:21] ℹ Clicking login button...
-[10:30:22] ℹ Filling email...
-[10:30:23] ℹ Filling password...
-[10:30:24] ℹ Submitting login form...
-[10:30:27] ✓ Login completed
-
-==================================================
-  Starting to scrape 3 plugins
-==================================================
-
-[10:30:28] ℹ Navigating to: https://marketplace.elgato.com/product/obs-studio-...
-[10:30:30] ℹ Preparing to install plugin: OBS Studio
-[10:30:31] ℹ Clicking install button...
-[10:30:34] ✓ Plugin "OBS Studio" processed successfully
-
-==================================================
-  Scraping Results
-==================================================
-
-[10:30:45] ✓ Successfully processed: 3 plugins
-[10:30:45] ℹ Closing browser...
-[10:30:46] ✓ Browser closed
-[10:30:46] ℹ UserData directory cleaned up
+```powershell
+yarn dev
 ```
 
-## 🏛️ Architecture
-
-The project follows a modular architecture with clear separation of concerns:
-
-- **Services**: Business logic (Browser, Auth, Plugin Scraper)
-- **Utils**: Helper functions (Logger, Filesystem)
-- **Types**: TypeScript definitions for type safety
-- **Config**: Centralized configuration and constants
+---
 
 ## 🐛 Troubleshooting
 
-### Browser doesn't open
-- Check if `HEADLESS=false` in the `.env` file
-- Make sure Playwright is installed correctly
+- If the tool exits immediately with configuration errors, open the `config/` files and ensure `email`, `password` and at least one plugin URL are present.
+- If Playwright fails to launch, verify your node and Playwright installation and whether `HEADLESS` or `settings.json` requests headless mode.
+- If plugin installation fails, make sure the Stream Deck native app is installed on your machine.
 
-### Authentication error
-- Confirm that email and password are correct in `.env`
-- Verify that your account is active on Elgato Marketplace
-
-### Plugins don't install
-- Make sure Stream Deck is installed and running
-- Check that plugin URLs are correct
-
-## 📄 License
-
-This project is for personal use in managing dotfiles.
-
-## 🤝 Contributing
-
-As this is a personal dotfiles project, modifications are made as needed for personal use. However, suggestions and improvements are always welcome!
+---
