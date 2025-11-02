@@ -1,4 +1,4 @@
-# Elgato Stream Deck Plugins Scraper
+# Elgato Stream Deck Plugins Auto-Installer
 
 Automated tool to install Stream Deck plugins from Elgato Marketplace using Playwright.
 
@@ -11,12 +11,126 @@ Automated tool to install Stream Deck plugins from Elgato Marketplace using Play
 - ✅ Robust error handling
 - ✅ Detailed results reporting
 - ✅ Modular and maintainable architecture
+- ✅ Standalone executables for Windows and macOS
 
 ---
 
-## 🚀 Quick start
+## � Download & Run (Recommended)
+
+### For End Users
+
+1. **Download the latest release** from the [Releases page](https://github.com/NedcloarBR/Elgato-StreamDeck-Plugins-AutoInstaller/releases)
+   - Windows: `streamdeck-installer-windows.zip`
+   - macOS: `streamdeck-installer-macos.zip`
+
+2. **Extract the ZIP file** to a folder of your choice
+
+3. **Configure your credentials and plugins**:
+   - Open the `config` folder
+   - Edit `login.json` with your Elgato Marketplace credentials:
+     ```json
+     {
+       "email": "your-email@example.com",
+       "password": "your-password"
+     }
+     ```
+   - Edit `plugins.json` with the plugin URLs you want to install:
+     ```json
+     [
+       "https://marketplace.elgato.com/product/obs-studio-...",
+       "https://marketplace.elgato.com/product/twitch-..."
+     ]
+     ```
+   - (Optional) Edit `settings.json` to customize behavior
+
+4. **Run the installer**:
+   - **Windows**: Double-click `start.bat`
+   - **macOS**: Double-click `start.sh` or run `./start.sh` in Terminal
+
+That's it! The installer will automatically login and install all configured plugins.
+
+### Verify Download Integrity (Optional)
+
+Each release includes `SHA256SUMS-windows.txt` and `SHA256SUMS-macos.txt` files.
+
+**Windows (PowerShell):**
+```powershell
+Get-FileHash streamdeck-installer-windows.zip -Algorithm SHA256
+# Compare with SHA256SUMS-windows.txt
+```
+
+**macOS (Terminal):**
+```bash
+shasum -a 256 streamdeck-installer-macos.zip
+# Compare with SHA256SUMS-macos.txt
+```
+
+---
+
+## 🛠️ Development Setup
+
+### For Developers
+
+If you want to modify or contribute to the project:
+
+## 🛠️ Development Setup
+
+### For Developers
+
+If you want to modify or contribute to the project:
 
 1. Clone the repository and open it:
+
+```powershell
+cd C:\path\to\Elgato-StreamDeck-Plugins-AutoInstaller
+```
+
+2. Install dependencies:
+
+```powershell
+yarn install
+```
+
+3. Create your configuration files from the provided examples (one-time):
+
+```powershell
+copy config\login.example.json config\login.json
+copy config\plugins.example.json config\plugins.json
+copy config\settings.example.json config\settings.json
+```
+
+4. Edit the files you just created:
+- `config/login.json` — add your Elgato Marketplace `email` and `password`.
+- `config/plugins.json` — add an array of Elgato Marketplace plugin URLs you want to process.
+- `config/settings.json` — optional. You can control runtime options such as `headless`, `timeout` and `viewport`.
+
+5. Run the scraper:
+
+```powershell
+yarn start
+```
+
+For development with live reload:
+
+```powershell
+yarn dev
+```
+
+### Build Executables
+
+To build standalone executables:
+
+```powershell
+# Build executables only
+yarn build:exe
+
+# Build executables and create release ZIPs
+yarn release:pkg
+```
+
+The executables will be in the `release/` folder.
+
+---
 
 ```powershell
 cd C:\path\to\Elgato-StreamDeck-Plugins-AutoInstaller
