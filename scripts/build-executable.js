@@ -20,10 +20,30 @@ async function ensureDirectories() {
 async function buildExecutables() {
   console.log('🔨 Building executables...\n');
 
-  const platforms = [
-    { name: 'Windows', target: 'node18-win-x64', output: 'streamdeck-installer-win.exe' },
-    { name: 'macOS', target: 'node18-macos-x64', output: 'streamdeck-installer-macos' }
+  const allPlatforms = [
+    { name: 'Windows', target: 'node18-win-x64', output: 'streamdeck-installer-win.exe', os: 'win32' },
+    { name: 'macOS', target: 'node18-macos-x64', output: 'streamdeck-installer-macos', os: 'darwin' }
   ];
+
+  const buildPlatform = process.env.BUILD_PLATFORM;
+  
+  let platforms;
+  if (buildPlatform) {
+
+    platforms = allPlatforms.filter(p => p.os === buildPlatform);
+    if (platforms.length === 0) {
+      console.warn(`⚠️  Unknown BUILD_PLATFORM: ${buildPlatform}. Building for all platforms.\n`);
+      platforms = allPlatforms;
+    }
+  } else if (process.env.CI) {
+
+    platforms = allPlatforms.filter(p => p.os === process.platform);
+    console.log(`ℹ️  CI detected. Building only for current platform: ${process.platform}\n`);
+  } else {
+
+    platforms = allPlatforms;
+    console.log(`ℹ️  Local build detected. Building for all platforms.\n`);
+  }
 
   for (const platform of platforms) {
     console.log(`📦 Building for ${platform.name}...`);
@@ -76,7 +96,7 @@ async function copyAssets() {
   }
   console.log('✅ Configurations copied!\n');
 
-  // Create launcher scripts
+
   console.log('🚀 Creating launcher scripts...');
   
   const windowsLauncher = `@echo off
@@ -134,7 +154,7 @@ async function copyDirectory(src, dest) {
 
     try {
       if (entry.isSymbolicLink()) {
-        // Handle symbolic links
+
         const linkTarget = fs.readlinkSync(srcPath);
         fs.symlinkSync(linkTarget, destPath);
       } else if (entry.isDirectory()) {
@@ -143,7 +163,7 @@ async function copyDirectory(src, dest) {
         fs.copyFileSync(srcPath, destPath);
       }
     } catch (error) {
-      // Skip files that can't be copied (like sockets)
+
       console.warn(`  ⚠️  Skipped: ${entry.name} (${error.code})`);
     }
   }
