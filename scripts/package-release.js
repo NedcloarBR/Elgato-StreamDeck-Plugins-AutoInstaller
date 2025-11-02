@@ -14,11 +14,13 @@ async function createZipArchives() {
     { 
       name: 'Windows', 
       files: ['streamdeck-installer-win.exe', 'start.bat'],
+      folders: ['.playwright-browsers', 'config'],
       outputName: 'streamdeck-installer-windows.zip' 
     },
     { 
       name: 'macOS', 
       files: ['streamdeck-installer-macos', 'start.sh'],
+      folders: ['.playwright-browsers', 'config'],
       outputName: 'streamdeck-installer-macos.zip' 
     }
   ];
@@ -30,22 +32,25 @@ async function createZipArchives() {
       if (process.platform === 'win32') {
         // Create a temporary PowerShell script file
         const psScriptPath = path.join(RELEASE_DIR, 'temp-zip.ps1');
-        const filesArray = platform.files.map(f => `"${path.join(RELEASE_DIR, f)}"`).join(',\n            ');
         
-        const psScript = `$files = @(
-            ${filesArray},
-            "${path.join(RELEASE_DIR, '.playwright-browsers')}",
-            "${path.join(RELEASE_DIR, 'config')}"
-        )
-        Compress-Archive -Path $files -DestinationPath "${path.join(RELEASE_DIR, platform.outputName)}" -Force
-        `;
+        // Build the script to change directory first
+        const psScript = `
+Set-Location "${RELEASE_DIR}"
+
+$files = @(
+    ${platform.files.map(f => `"${f}"`).join(',\n    ')},
+    ${platform.folders.map(f => `"${f}"`).join(',\n    ')}
+)
+
+Compress-Archive -Path $files -DestinationPath "${platform.outputName}" -Force
+`;
         
         fs.writeFileSync(psScriptPath, psScript);
         await execAsync(`powershell -ExecutionPolicy Bypass -File "${psScriptPath}"`);
         fs.unlinkSync(psScriptPath);
       } else {
-        const filesStr = platform.files.join(' ');
-        const zipCommand = `cd ${RELEASE_DIR} && zip -r ${platform.outputName} ${filesStr} .playwright-browsers config`;
+        const filesStr = [...platform.files, ...platform.folders].join(' ');
+        const zipCommand = `cd ${RELEASE_DIR} && zip -r ${platform.outputName} ${filesStr}`;
         await execAsync(zipCommand);
       }
       
