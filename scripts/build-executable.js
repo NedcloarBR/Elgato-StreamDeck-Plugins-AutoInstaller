@@ -132,10 +132,19 @@ async function copyDirectory(src, dest) {
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
 
-    if (entry.isDirectory()) {
-      await copyDirectory(srcPath, destPath);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
+    try {
+      if (entry.isSymbolicLink()) {
+        // Handle symbolic links
+        const linkTarget = fs.readlinkSync(srcPath);
+        fs.symlinkSync(linkTarget, destPath);
+      } else if (entry.isDirectory()) {
+        await copyDirectory(srcPath, destPath);
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+      }
+    } catch (error) {
+      // Skip files that can't be copied (like sockets)
+      console.warn(`  ⚠️  Skipped: ${entry.name} (${error.code})`);
     }
   }
 }
