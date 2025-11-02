@@ -18,6 +18,16 @@ async function main() {
   let userDataDir = "";
 
   try {
+    if (!FileSystemHelper.isStreamDeckInstalled()) {
+      logger.error(
+        "Stream Deck app not found. Please install the Elgato Stream Deck app before running this tool."
+      );
+      logger.info(
+        "Download page: https://www.elgato.com/en/downloads (choose 'Stream Deck' for your OS)"
+      );
+      process.exit(1);
+    }
+
     userDataDir = FileSystemHelper.setupUserDataDir();
 
     const browserService = new BrowserService();
